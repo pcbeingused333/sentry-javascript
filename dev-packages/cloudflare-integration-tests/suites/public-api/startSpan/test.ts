@@ -205,6 +205,15 @@ it('sends a streamed span envelope with correct spans for a manually started spa
         type: 'string',
         value: 'localhost',
       },
+      // From the `CF-Connecting-IP` header that `wrangler dev` sets.
+      'client.address': {
+        type: 'string',
+        value: '127.0.0.1',
+      },
+      'http.response.header.content-type': {
+        type: 'array',
+        value: ['text/plain;charset=UTF-8'],
+      },
       'url.full': {
         type: 'string',
         value: expect.stringMatching(/^http:\/\/localhost:.+$/),

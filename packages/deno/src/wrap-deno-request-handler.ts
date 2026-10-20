@@ -1,6 +1,6 @@
 import type { Integration } from '@sentry/core';
 import { debug, getClient, withIsolationScope } from '@sentry/core';
-import { wrapServerRequestHandler } from '@sentry/server-utils';
+import { wrapServerRequestHandler } from '@sentry/server-utils/request-handler';
 import type { DenoServeIntegrationOptions } from './integrations/deno-serve';
 
 export type RequestHandlerWrapperOptions<Addr extends Deno.Addr> = {
