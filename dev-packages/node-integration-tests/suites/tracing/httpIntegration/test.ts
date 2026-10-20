@@ -22,9 +22,9 @@ describe('httpIntegration', () => {
     cleanupChildProcesses();
   });
 
-  describe('onSpanCreated option', () => {
+  describe('onSpanCreated and onSpanEnd options', () => {
     createEsmAndCjsTests(__dirname, 'server.mjs', 'instrument-options.mjs', (createRunner, test) => {
-      test('allows to configure onSpanCreated', async () => {
+      test('allows to configure onSpanCreated and onSpanEnd', async () => {
         const runner = createRunner()
           .expect({
             span: {
@@ -43,6 +43,8 @@ describe('httpIntegration', () => {
                     'onSpanCreated.reqMethod': { type: 'string', value: 'GET' },
                     'onSpanCreated.resUrl': { type: 'string', value: expect.stringMatching(/\/test$/) },
                     'onSpanCreated.resMethod': { type: 'string', value: 'GET' },
+                    'onSpanEnd.reqUrl': { type: 'string', value: expect.stringMatching(/\/test$/) },
+                    'onSpanEnd.resStatusCode': { type: 'integer', value: 200 },
                   }),
                 }),
               ]),
@@ -50,6 +52,43 @@ describe('httpIntegration', () => {
           })
           .start();
         runner.makeRequest('get', '/test');
+        await runner.completed();
+      });
+    });
+  });
+
+  describe('onSpanEnd that throws', () => {
+    createEsmAndCjsTests(__dirname, 'server.mjs', 'instrument-onSpanEnd-throws.mjs', (createRunner, test) => {
+      test('still ends and sends the span, and keeps the server running', async () => {
+        const runner = createRunner()
+          .expect({
+            span: {
+              items: expect.arrayContaining([
+                expect.objectContaining({
+                  is_segment: true,
+                  attributes: expect.objectContaining({
+                    [URL_FULL]: { type: 'string', value: expect.stringMatching(/\/test$/) },
+                    [HTTP_RESPONSE_STATUS_CODE]: { type: 'integer', value: 200 },
+                  }),
+                }),
+              ]),
+            },
+          })
+          .expect({
+            span: {
+              items: expect.arrayContaining([
+                expect.objectContaining({
+                  is_segment: true,
+                  attributes: expect.objectContaining({
+                    [URL_FULL]: { type: 'string', value: expect.stringMatching(/\/test$/) },
+                  }),
+                }),
+              ]),
+            },
+          })
+          .start();
+        await runner.makeRequest('get', '/test');
+        await runner.makeRequest('get', '/test');
         await runner.completed();
       });
     });
