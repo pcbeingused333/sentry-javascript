@@ -6,6 +6,7 @@ export { expressErrorHandler, setupExpressErrorHandler } from '@sentry/server-ut
 export {
   amqplibIntegration,
   anthropicAIIntegration,
+  awsIntegration,
   dataloaderIntegration,
   expressIntegration,
   type ExpressIntegrationOptions,
@@ -24,6 +25,7 @@ export {
   langGraphIntegration,
   lruMemoizerIntegration,
   createFlueInstrumentation,
+  type FlueOptions,
   mastraIntegration,
   piDurableIntegration,
   mcpServerIntegration,
@@ -57,6 +59,8 @@ export {
   instrumentLangChainEmbeddings,
   instrumentStateGraph,
   instrumentStateGraphCompile,
+  instrumentCreateReactAgent,
+  instrumentPostgresJsSql,
   fastifyIntegration,
   // oxlint-disable-next-line typescript/no-deprecated
   setupFastifyErrorHandler,
@@ -148,6 +152,7 @@ export {
   captureSession,
   endSession,
   addIntegration,
+  moduleMetadataIntegration,
   startSpan,
   startSpanManual,
   startInactiveSpan,
