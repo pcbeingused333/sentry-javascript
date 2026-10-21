@@ -3,6 +3,9 @@ import { monitorStream } from '../../src/utils/monitorStream';
 
 const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 
+// Runs every pending promise job, for checks that something did not happen.
+const flushPromiseJobs = (): Promise<void> => new Promise(resolve => setImmediate(resolve));
+
 describe('monitorStream', () => {
   it('passes the chunks through and calls onDone when the source closes', async () => {
     const onDone = vi.fn();
@@ -35,11 +38,11 @@ describe('monitorStream', () => {
     );
 
     const reader = monitorStream(source, vi.fn(), vi.fn()).getReader();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await flushPromiseJobs();
     expect(pulls).toBe(0);
 
     await reader.read();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await flushPromiseJobs();
     expect(pulls).toBe(1);
     await reader.cancel();
   });
@@ -61,10 +64,9 @@ describe('monitorStream', () => {
 
     await reader.read();
     await reader.cancel(reason);
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await vi.waitFor(() => expect(onDone).toHaveBeenCalledTimes(1));
 
     expect(sourceCancelReason).toBe(reason);
-    expect(onDone).toHaveBeenCalledTimes(1);
     expect(onError).not.toHaveBeenCalled();
   });
 
@@ -87,10 +89,10 @@ describe('monitorStream', () => {
       controller!.error(error);
 
       await expect(text).rejects.toBe(error);
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await vi.waitFor(() => expect(onDone).toHaveBeenCalledTimes(1));
+      await flushPromiseJobs();
 
       expect(onError).toHaveBeenCalledWith(error);
-      expect(onDone).toHaveBeenCalledTimes(1);
       expect(unhandled).not.toHaveBeenCalled();
     } finally {
       process.off('unhandledRejection', unhandled);

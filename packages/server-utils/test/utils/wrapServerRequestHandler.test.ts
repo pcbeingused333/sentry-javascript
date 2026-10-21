@@ -1,6 +1,6 @@
 import type { Event } from '@sentry/core';
 import { getIsolationScope, setCurrentClient, withIsolationScope } from '@sentry/core';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { setAsyncLocalStorageAsyncContextStrategy } from '../../src/async-context';
 import type { ServerRequestHandlerConfig } from '../../src/utils/wrapServerRequestHandler';
 import { wrapServerRequestHandler } from '../../src/utils/wrapServerRequestHandler';
@@ -109,10 +109,9 @@ describe('wrapServerRequestHandler', () => {
 
     controller!.close();
     expect(await response.text()).toBe('data: one\n\n');
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await vi.waitFor(() => expect(transactions).toHaveLength(1));
 
     expect(calls).toEqual(['onSpanEnd']);
-    expect(transactions).toHaveLength(1);
     expect(transactions[0]?.contexts?.trace?.data?.['onSpanEnd.status']).toBe(201);
   });
 
@@ -133,13 +132,13 @@ describe('wrapServerRequestHandler', () => {
     const text = response.text();
     controller!.error(error);
     await expect(text).rejects.toBe(error);
-    await new Promise(resolve => setTimeout(resolve, 0));
   }
 
   it('captures an error from a streamed response source and marks the span as failed', async () => {
     const { events, transactions, serve } = setup({ spans: true });
 
     await serveFailingStream(serve);
+    await vi.waitFor(() => expect(transactions).toHaveLength(1));
 
     expect(events).toHaveLength(1);
     expect(events[0]?.exception?.values?.[0]?.mechanism).toEqual(MECHANISM);
@@ -150,8 +149,8 @@ describe('wrapServerRequestHandler', () => {
     const { events, transactions, serve } = setup({ spans: false });
 
     await serveFailingStream(serve);
+    await vi.waitFor(() => expect(events).toHaveLength(1));
 
-    expect(events).toHaveLength(1);
     expect(events[0]?.exception?.values?.[0]?.mechanism).toEqual(MECHANISM);
     expect(transactions).toHaveLength(0);
   });
