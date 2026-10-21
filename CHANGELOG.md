@@ -81,10 +81,13 @@ Work in this release was contributed by @adityareddy-dev, @jpdefo, @Jxxunnn, @ph
   When the `@sentry/cloudflare/vite` plugin bundles an instrumented package (for example `pg` or `openai`), the SDK adds the matching integration with its default options. `@sentry/cloudflare` now exports these integrations, so you can set their options, for example:
 
   ```ts
-  Sentry.withSentry(env => ({
-    dsn: env.SENTRY_DSN,
-    integrations: [Sentry.openAIIntegration({ recordInputs: false, recordOutputs: false })],
-  }), handler);
+  Sentry.withSentry(
+    env => ({
+      dsn: env.SENTRY_DSN,
+      integrations: [Sentry.openAIIntegration({ recordInputs: false, recordOutputs: false })],
+    }),
+    handler,
+  );
   ```
 
   These integrations need the vite plugin. Without it, they record nothing, and with `debug: true` the SDK logs a warning.
