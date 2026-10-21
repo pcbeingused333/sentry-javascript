@@ -1,4 +1,5 @@
-import { GEN_AI_INPUT_MESSAGES, GEN_AI_RESPONSE_TEXT } from '@sentry/conventions/attributes';
+import { GEN_AI_INPUT_MESSAGES, GEN_AI_RESPONSE_TEXT, SENTRY_OP, SENTRY_ORIGIN } from '@sentry/conventions/attributes';
+import { GEN_AI_CHAT } from '@sentry/conventions/op';
 import { expect, it } from 'vitest';
 import { createRunner } from '../../../../runner';
 
@@ -15,8 +16,8 @@ it('applies the options of an openAIIntegration the user configured', async ({ s
   const attributes = genAiSpans[0]?.attributes;
 
   // The vite plugin instrumented `openai`, so the channel integration created the span.
-  expect(attributes?.['sentry.op']).toEqual({ type: 'string', value: 'gen_ai.chat' });
-  expect(attributes?.['sentry.origin']).toEqual({ type: 'string', value: 'auto.ai.openai' });
+  expect(attributes?.[SENTRY_OP]).toEqual({ type: 'string', value: GEN_AI_CHAT });
+  expect(attributes?.[SENTRY_ORIGIN]).toEqual({ type: 'string', value: 'auto.ai.openai' });
   // `recordInputs: false` from the configured integration wins over `dataCollection`, which records
   // inputs by default. Outputs keep the default.
   expect(attributes?.[GEN_AI_INPUT_MESSAGES]).toBeUndefined();
