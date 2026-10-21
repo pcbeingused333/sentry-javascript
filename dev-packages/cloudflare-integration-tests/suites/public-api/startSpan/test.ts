@@ -1,5 +1,6 @@
 import { SDK_VERSION, SEMANTIC_ATTRIBUTE_SENTRY_SAMPLE_RATE } from '@sentry/core';
 import {
+  CLIENT_ADDRESS,
   SENTRY_SEGMENT_NAME_SOURCE,
   SENTRY_SDK_NAME,
   SENTRY_SDK_VERSION,
@@ -206,7 +207,7 @@ it('sends a streamed span envelope with correct spans for a manually started spa
         value: 'localhost',
       },
       // From the `CF-Connecting-IP` header that `wrangler dev` sets.
-      'client.address': {
+      [CLIENT_ADDRESS]: {
         type: 'string',
         value: '127.0.0.1',
       },
